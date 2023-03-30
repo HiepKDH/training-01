@@ -1,0 +1,379 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.5rem;
+    font-family: "Roboto", sans-serif;
+    color: var(--primary-color);
+}
+
+/* Common */
+:root {
+    --primary-color: #464343;
+    --icons-color: #9f9b9b;
+}
+
+a {
+    text-decoration: none;
+}
+
+.main-content {
+    width: 1200px;
+    max-width: calc(100% - 48px);
+    margin: 0 auto;
+}
+
+/* header */
+
+.header__staff {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px 4px 0 0;
+    border-left: 10px solid orange;
+}
+
+.heading {
+    font-weight: 500;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: #090700;
+}
+
+.action a {
+    color: orange;
+    padding: 3px 10px;
+    border: 1px solid orange;
+    border-radius: 3px;
+}
+
+.action__btn {
+    font-size: 1.3rem;
+}
+
+.navbar {
+    display: flex;
+    height: 33px;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--primary-color);
+}
+
+.navbar-search {
+    position: relative;
+    display: flex;
+    margin-left: 14px;
+    padding-left: 20px;
+    border-radius: 999px;
+    border: 1px solid var(--primary-color);
+}
+
+.navbar-search__input,
+.navbar-search__btn {
+    background: transparent;
+    outline: none;
+    border: none;
+}
+
+.navbar-search__input {
+    width: 250px;
+    padding: 5px 0;
+    margin-right: 32px;
+}
+
+.navbar-search__input:not(:placeholder-shown) ~ .navbar-search__btn {
+    color: #333;
+}
+
+.navbar-search__input:not(:placeholder-shown) ~ .navbar-search__clear {
+    display: block;
+}
+
+.navbar-search__btn {
+    width: 30px;
+    border-radius: 0 99px 99px 0;
+    color: rgba(22, 24, 35, 0.34);
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.navbar-search__btn:hover {
+    background: #16182308;
+}
+
+.navbar-search__clear {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    outline: none;
+    border: none;
+    color: #666;
+    background: transparent;
+    display: none;
+    cursor: pointer;
+}
+
+.navbar__status {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 140px;
+}
+
+.navbar__status span {
+    font-size: 1.2rem;
+}
+
+.navbar__status-check {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding-top: 2px;
+    width: 14px;
+    height: 14px;
+    font-size: 0.9rem;
+    border-radius: 50%;
+    color: white;
+    background-color: green;
+    cursor: pointer;
+}
+
+.navbar__status-lock {
+    font-size: 1.4rem;
+    color: #7c0909;
+    cursor: pointer;
+}
+
+.navbar__sort {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar__sort a {
+    color: #000;
+}
+
+.navbar__sort-desc {
+    display: flex;
+    padding: 1px;
+    margin-right: 10px;
+    gap: 10px;
+    font-size: 1.2rem;
+}
+
+.count-staff {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 33px;
+    font-size: 1.2rem;
+    border: 1px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.count-staff p {
+    margin-left: 14px;
+}
+
+.delete-staff {
+    margin-right: 10px;
+}
+
+.delete-staff span {
+    color: blue;
+    cursor: pointer;
+    padding: 3px;
+}
+
+.list-staff {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--primary-color);
+    position: relative;
+}
+
+.list-staff__info {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    padding: 5px 14px;
+}
+
+.list-staff__revenue {
+    display: flex;
+    gap: 5px;
+    font-size: 1.2rem;
+}
+
+.list-staff__action {
+    width: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.list-staff__action-update {
+    color: var(--icons-color);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    padding: 3px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--icons-color);
+}
+
+.list-staff__action-clear {
+    color: var(--icons-color);
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.list-staff__check {
+    position: relative;
+}
+
+.row {
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    border: 1px solid var(--primary-color);
+}
+
+.row__quantity {
+    margin-right: 20px;
+    font-size: 1.2rem;
+}
+
+.row__quantity span {
+    font-weight: 600;
+    color: #000;
+}
+
+.row__quantity-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.row__quantity-info i {
+    margin-left: 15px;
+}
+
+.row__page {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.row__page a {
+    padding: 4px;
+    color: var(--primary-color);
+}
+
+.page-link {
+    display: inline-block;
+    padding: 5px 10px;
+    margin-right: 5px;
+    background-color: #eee;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.page-link.active {
+    background-color: #333;
+    color: #fff;
+}
+
+.list-users {
+    border: 1px solid #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.list-users img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.list-users i {
+    margin-right: 5px;
+}
+
+.list-users__info {
+    display: flex;
+}
+
+.name {
+    font-weight: bold;
+}
+
+.user-name {
+    color: #666;
+}
+
+.email {
+    text-decoration: underline;
+}
+
+.birth-date {
+    font-style: italic;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gender {
+    text-transform: capitalize;
+}
+
+.phone_number {
+    font-size: 14px;
+}
+
+.list-users__item div {
+    padding: 1px 0 2px 30px;
+}
+
+.list-users__action {
+    gap: 50px;
+    display: flex;
+}
+
+.list-users__action-update:hover a {
+    background: #16182308;
+}
+
+.list-users__action-update a {
+    color: #999595;
+    padding: 5px;
+    border: 1px solid #999595;
+    border-radius: 3px;
+}
+
+.list-users__action-clear {
+    color: #999595;
+}

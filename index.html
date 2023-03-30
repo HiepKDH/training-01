@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Training</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="./assets/css/reset.css" />
+        <link rel="stylesheet" href="./assets/css/styles.css" />
+    </head>
+    <body>
+        <header class="header">
+            <div class="main-content">
+                <div class="header__staff">
+                    <!-- Heading -->
+                    <h3 class="heading">Danh sách nhân viên</h3>
+                    <!-- Action -->
+                    <div class="action">
+                        <a href="add-user.html" class="action__btn">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Nhân viên mới</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="navbar">
+                    <!-- Search form -->
+                    <form action="" class="navbar-search">
+                        <input
+                            type="text"
+                            id="search-input"
+                            class="navbar-search__input"
+                            placeholder="Nhập tên, sđt hoặc email..."
+                        />
+                        <!-- Submit button -->
+                        <button
+                            type="submit"
+                            id="search-btn"
+                            class="navbar-search__btn"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+
+                        <!-- Clear button -->
+                        <button type="reset" class="navbar-search__clear">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </form>
+                    <!-- Status -->
+                    <div class="navbar__status">
+                        <label for="status-checkbox">Trạng thái:</label>
+                        <input
+                            type="checkbox"
+                            id="status-checkbox"
+                            name="checkbox"
+                        />
+                        <i class="fa-solid fa-lock navbar__status-lock"></i>
+                    </div>
+                    <!-- Sort -->
+                    <div class="navbar__sort">
+                        <div class="navbar__sort-desc">
+                            <a href="#!">
+                                <div>
+                                    <label for="sort-users"
+                                        >Sắp xếp theo:</label
+                                    >
+                                    <select id="sort-users" name="sort-users">
+                                        <option value="-latest_update_at">
+                                            Mới nhất
+                                        </option>
+                                        <option value="+latest_update_at">
+                                            Cũ nhất
+                                        </option>
+                                    </select>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="count-staff">
+                    <div>
+                        <p>
+                            Có tất cả <span class="num-users"></span> nhân viên
+                        </p>
+                    </div>
+                    <div class="delete-staff">
+                        <span onclick="handleDeleteAllBtnClick(event)"
+                            >Xóa</span
+                        >
+                        hoặc
+                        <span onclick="handleUncheckAllBtnClick(event)"
+                            >Bỏ chọn</span
+                        >
+                        hoặc
+                        <span
+                            onclick="handleCheckAllBtnClick(event)"
+                            id="checkbox-all"
+                            >Chọn tất cả</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="main-content">
+                <div class="users-container"></div>
+                <div class="list-staff" id="list-users"></div>
+            </div>
+        </main>
+        <footer>
+            <div class="main-content">
+                <div class="row">
+                    <div class="row__quantity">
+                        <ul class="row__quantity-info">
+                            <li>Hiển thị:</li>
+                            <span class="num-users-page">
+                                25<i class="fa-solid fa-angle-down"></i>
+                            </span>
+                            <li>nhân viên/ trang</li>
+                        </ul>
+                    </div>
+                    <div class="row__page">
+                        <a href="#!">Trước</a>
+                        <span class="pagination-container"></span>
+                        <a href="#!">Sau</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script src="./assets/js/jquery-3.6.0.min.js"></script>
+        <script src="./assets/js/main.js"></script>
+    </body>
+</html>
