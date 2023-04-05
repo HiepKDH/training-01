@@ -1,188 +1,361 @@
-const usersAPI =
-    "http://training.mumesoft.com/api/users?page=1&page_size=30&sort=+latest_update_at";
-const authToken = "MBczeFfWzzspy1a1C4bs5mAuDCAbo187x5nfwJls";
-const requestOptions = {
-    headers: {
-        Authorization: `Bearer ${authToken}`,
-    },
-};
-const usersPerPage = 4; // set the number of users per page
-let searchQuery = ""; // declare searchQuery as a global variable
+$(document).ready(function () {
+    let API_URL = "http://training.mumesoft.com/api/users";
+    let TOKEN = "Bearer MBczeFfWzzspy1a1C4bs5mAuDCAbo187x5nfwJls";
+    let CONTENT_TYPE = "application/json";
+    let pageSize = localStorage.getItem("pageSize") || 5;
+    let currentPage = localStorage.getItem("currentPage") || 1;
+    let searchQuery = localStorage.getItem("searchQuery") || "";
+    let sortOrder = localStorage.getItem("sortOrder") || "+latest_update_at";
 
-function start() {
-    const currentPage = localStorage.getItem("currentPage") || 1;
-    const searchQuery = localStorage.getItem("searchQuery") || "";
-    const sortOrder = localStorage.getItem("sortOrder") || "+latest_update_at";
-
-    // Get the filtered users
-    getUsers(renderUsers, currentPage, searchQuery, sortOrder);
-
-    // Add event listeners
-    const searchBtn = document.getElementById("search-btn");
-    const sortBtn = document.getElementById("sort-users");
-
-    searchBtn.addEventListener("click", handleSearchBtnClick);
-    sortBtn.addEventListener("change", handleSortBtnChange);
-}
-
-start();
-
-function handleSearchBtnClick() {
-    const searchInput = document.getElementById("search-input");
-    const searchQuery = searchInput.value.trim().toLowerCase();
-    localStorage.setItem("searchQuery", searchQuery);
-    getUsers(renderUsers, 1, searchQuery);
-}
-
-function handleSortBtnChange() {
-    const sortBtn = document.getElementById("sort-users");
-    const sortOrder = sortBtn.value;
-    localStorage.setItem("sortOrder", sortOrder);
-    getUsers(renderUsers, 1, searchQuery, sortOrder);
-}
-
-// Send the request to get users with the given parameters
-async function getUsers(
-    callback,
-    currentPage,
-    searchQuery = "",
-    sortOrder = ""
-) {
-    let apiUrl = usersAPI + `?page=${currentPage}`;
-    if (searchQuery) {
-        // ký tự &, ?, /, =, +, #, v.v. phải được mã hóa để tránh xảy ra lỗi trong quá trình truyền tải.
-        apiUrl += `&search=${encodeURIComponent(searchQuery)}`;
-    }
-    apiUrl += `&sort=${sortOrder}`;
-    try {
-        const response = await fetch(apiUrl, requestOptions);
-        if (response.ok) {
-            const data = await response.json();
-            const users = data.data;
-            const filteredUsers = searchQuery
-                ? users.filter((user) =>
-                      Object.values(user)
-                          .join(" ")
-                          .toLowerCase()
-                          .includes(searchQuery)
-                  )
-                : users;
-            callback(
-                { data: filteredUsers, total: filteredUsers.length },
-                currentPage
-            );
-        } else {
-            throw new Error(`Request failed with status ${response.status}`);
+    function fetchUsers(page, searchQuery = "", sortOrder = "") {
+        let apiUrl = `${API_URL}?page=${page}&page_size=${pageSize}&sort=${sortOrder}`;
+        if (searchQuery) {
+            apiUrl += `&search=${searchQuery}`;
         }
-    } catch (error) {
-        console.error("Error:", error);
+        const headers = {
+            Authorization: TOKEN,
+            "Content-Type": CONTENT_TYPE,
+        };
+        fetch(apiUrl, { headers })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                const userList = data.data
+                    .filter((user) => {
+                        return $("#status-checkbox").prop("checked")
+                            ? user.is_active
+                            : true;
+                    })
+                    .filter((user) => {
+                        return (
+                            (user.name &&
+                                user.username &&
+                                user.email &&
+                                user.phone_number &&
+                                user.name
+                                    .toLowerCase()
+                                    .includes(searchQuery.toLowerCase())) ||
+                            user.username
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase()) ||
+                            user.phone_number
+                                ?.toLowerCase()
+                                .includes(searchQuery.toLowerCase()) ||
+                            user.email
+                                ?.toLowerCase()
+                                .includes(searchQuery.toLowerCase())
+                        );
+                    })
+                    .map(getUserHtml)
+                    .join("");
+                $("#user-list").html(userList);
+
+                const totalPages = Math.ceil(data.total / pageSize);
+                let paginationHtml = "";
+                for (let i = 1; i <= totalPages; i++) {
+                    const activeClass = currentPage == i ? "active" : "";
+                    paginationHtml += `
+            <a href="#" class="page-link__item ${activeClass}" data-page="${i}">${i}</a>
+                `;
+                }
+
+                $("#pagination").html(paginationHtml);
+                // Display current page user count
+                const startUserIndex = (currentPage - 1) * pageSize + 1;
+                const endUserIndex = startUserIndex + userList.length - 1;
+                const totalUsers = data.total;
+                const displayedUsers =
+                    endUserIndex > totalUsers ? totalUsers : endUserIndex;
+                $(".num-users").text(displayedUsers);
+
+                $("#endBtn")
+                    .off("click")
+                    .on("click", () => {
+                        currentPage = totalPages;
+                        fetchUsers(currentPage, searchQuery, sortOrder);
+                        localStorage.setItem("currentPage", currentPage);
+                    });
+
+                $(".nextBtn")
+                    .off("click")
+                    .on("click", () => {
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            fetchUsers(currentPage, searchQuery, sortOrder);
+                            localStorage.setItem("currentPage", currentPage);
+                        }
+                    });
+            })
+            .catch((error) => console.log(error));
     }
 
-    localStorage.setItem("currentPage", currentPage);
-}
-
-function renderUsers(data, currentPage) {
-    const users = data.data;
-    console.log(users);
-    var startIndex = (currentPage - 1) * usersPerPage; // calculate the start index for the current page
-    var endIndex = startIndex + usersPerPage; // calculate the end index for the current page
-    var paginatedUsers = users.slice(startIndex, endIndex); // slice the users array to get the users for the current page
-    var html = "";
-    localStorage.setItem("currentPage", currentPage);
-    for (var i = 0; i < paginatedUsers.length; i++) {
-        var user = paginatedUsers[i];
-        html += `
+    function getUserHtml(user) {
+        return `
         <div class="list-users" id="list-users-item-${user.id}">
-            <div class="list-users__info">
-                <div class="avatar"><img src="${user.avatar}" 
-                    alt="${user.avatar}">
-                </div>
-                <div class="list-users__item">
-                    <div class="name" id="update-name"><i class="fa fa-user"></i>
-                    ${user.name}
-                    </div>
-                    <div class="user-name" id="update-username"><i class="fa fa-user"></i> 
-                    ${user.username}
-                    </div>
-                    <div class="email" id="update-email"><i class="fa fa-envelope"></i>
-                    ${user.email}
-                    </div>
-                    <div class="birth-date" id="update-birth-date"><i class="fa fa-calendar"></i> 
-                    ${user.birth_date}
-                    </div>
-                    <div class="gender" id="update-gender"><i class="fa fa-venus-mars"></i> 
-                    ${getGenderString(user.gender)}
-                    </div>
-                    <div class="phone_number" id="update-phone_number"><i class="fa-solid fa-phone"></i> 
-                    ${user.phone_number}
-                    </div>
+            <div class="list-users__heading">
+                <div class="list-users__check">
+                <input type="checkbox" class="user-checkbox" data-user-id="${
+                    user.id
+                }">
+                    
                 </div>
             </div>
-            <div class="list-users__action-update" onclick="handleUpdateBtnClick(event, ${
-                user.id
-            })">
-                <a href="#!">
-                    <i class="fa-regular fa-pen-to-square"></i>
-                        Cập nhật
-                </a>
+            <div class="row__item">
+                <div class="me-5">
+                    <img class="list-users__avatar" src="${
+                        user.avatar ? user.avatar : getAvatarString(user.gender)
+                    }" alt="Avatar">
+                </div>
+                <div class="row__item-info row g-3">
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__name line-clamp line-2  break-all" id="update-name">
+                         <i class="fa fa-user" title="Tên"></i>
+                            ${user.name}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__user-name line-clamp line-2 break-all" id="update-username">
+                        <i class="fa fa-user" title="Tên người dùng"></i>
+                            ${user.username}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__email line-clamp line-2 break-all" id="update-email">
+                        <i class="fa fa-envelope" title="Email"></i>
+                            ${user.email}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__birth-date" id="update-birth-date">
+                        <i class="fa fa-calendar" title="Ngày sinh"></i>
+                        ${new Date(user.birth_date).toLocaleDateString("vi-VN")}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__gender" id="update-gender">
+                        <i class="fa fa-venus-mars" title="Giới tính"></i>
+                            ${getGenderString(user.gender)}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="list-users__phone_number" id="update-phone_number">
+                        <i class="fa-solid fa-phone" title="Số điện thoại"></i>
+                            ${user.phone_number}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="list-users__action">
-                <div onclick="handleDeleteBtnClick(event, ${user.id})">
-                    <a href="#!" class="list-users__action-clear">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-                </div>
-            <div class="list-users__check">
-                <input
-                    type="checkbox"
-                    data-id="${user.id}"
-                    name="status-checkbox"
-                    onclick="handleDeleteAllBtnClick(event)"
-                />
-            </div>
+                  <div onclick="handleUpdateBtnClick(event, ${user.id})">
+                      <a href="#!" class="list-users__update">
+                          <i class="fa-regular fa-pen-to-square"></i>
+                              Cập nhật
+                      </a>
+                  </div>
+                  <div class="delete-user-btn">
+                      <div class="list-users__action-clear">
+                          <i class="fa-solid fa-trash-can" title="Xóa"></i>
+                      </div>
+                  </div>
+              </div>
+            <div class="list-users__status-check">
+                    <label for="status-check-${
+                        user.id
+                    }" title="Đang hoạt động" ${user.is_active ? "checked" : "hidden"}></label>
             </div>
         </div>
-      `;
+    `;
     }
 
-    $(".users-container").html(html);
-    // Calculate number of pages
-    var numPages = Math.ceil(users.length / usersPerPage);
+    fetchUsers(currentPage, searchQuery, sortOrder);
 
-    // Generate pagination links
-    var paginationHtml = "";
-    for (var i = 1; i <= numPages; i++) {
-        paginationHtml +=
-            '<button class="page-link" data-page="' +
-            i +
-            '">' +
-            i +
-            "</button>";
+    // Set default checkbox state from local storage
+    const savedStatusCheckboxChecked = localStorage.getItem(
+        "statusCheckboxChecked"
+    );
+    if (savedStatusCheckboxChecked !== null) {
+        $("#status-checkbox").prop(
+            "checked",
+            savedStatusCheckboxChecked == "true"
+        );
     }
 
-    // Render pagination links
-    $(".pagination-container").html(paginationHtml);
-
-    // Add click event to pagination links
-    $(".pagination-container").on("click", ".page-link", function (event) {
-        event.preventDefault();
-        var pageNum = $(this).data("page");
-        getUsers(renderUsers, pageNum);
+    $("#status-checkbox").on("change", function () {
+        localStorage.setItem(
+            "statusCheckboxChecked",
+            $("#status-checkbox").prop("checked")
+        );
+        fetchUsers(currentPage, searchQuery, sortOrder);
     });
 
-    // Highlight current page link
-    $(".page-link").removeClass("active"); // remove the "active" class from all page links
-    $(".page-link[data-page='" + currentPage + "']").addClass("active"); // add the "active" class to the current page link
+    // handle select onchange event
+    $("#employee-count").on("change", function () {
+        pageSize = $(this).val();
+        currentPage = 1;
+        localStorage.setItem("pageSize", pageSize);
+        localStorage.setItem("currentPage", currentPage);
+        fetchUsers(currentPage, searchQuery, sortOrder);
+    });
 
-    // Display the number of users on the current page
-    var numUsersOnPage = paginatedUsers.length;
-    var startIndexOnPage = startIndex + 1;
-    var endIndexOnPage = startIndexOnPage + numUsersOnPage;
-    $(".num-users").html(users.length);
-    $(".num-users-page").html(endIndexOnPage - startIndexOnPage);
-}
+    $("#search-btn").on("click", function (event) {
+        event.preventDefault();
+        searchQuery = $("#search-input").val().toLowerCase();
+        currentPage = 1;
+        fetchUsers(currentPage, searchQuery, sortOrder);
+        localStorage.setItem("searchQuery", searchQuery);
+        $("#user-list").html("");
+    });
 
-// convert gender from number to String
+    // store user sort selection state
+    const SORT_ORDER_KEY = "sortOrder";
+    const savedSortOrder = localStorage.getItem(SORT_ORDER_KEY);
+    if (savedSortOrder) {
+        $("#sort-users").val(savedSortOrder);
+    }
+
+    $("#sort-users").on("change", function (event) {
+        const sortOrder = event.target.value;
+        currentPage = 1;
+        localStorage.setItem(SORT_ORDER_KEY, sortOrder);
+        $(".page-link__item").removeClass("active");
+        fetchUsers(currentPage, searchQuery, sortOrder);
+    });
+
+    // Pagination event listener
+    $("#pagination").on("click", ".page-link__item", function (event) {
+        event.preventDefault();
+        const pageNumber = $(this).attr("data-page");
+        if (pageNumber !== currentPage) {
+            fetchUsers(pageNumber);
+            currentPage = pageNumber;
+            localStorage.setItem("currentPage", currentPage);
+            $(".page-link__item").removeClass("active");
+            $(this).addClass("active");
+        }
+    });
+
+    // handle pagination button clicks
+    $("#startBtn").on("click", function () {
+        currentPage = 1;
+        $(".page-link__item").removeClass("active");
+        fetchUsers(currentPage, searchQuery, sortOrder);
+    });
+
+    $(".prevBtn").on("click", function () {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchUsers(currentPage, searchQuery, sortOrder);
+            $(".page-link__item").removeClass("active");
+        }
+    });
+
+    // Load saved data from localStorage
+    const savedPageSize = localStorage.getItem("pageSize");
+    if (savedPageSize) {
+        pageSize = savedPageSize;
+        $("#employee-count").val(pageSize);
+    }
+    const savedCurrentPage = localStorage.getItem("currentPage");
+    if (savedCurrentPage) {
+        currentPage = savedCurrentPage;
+        fetchUsers(currentPage, searchQuery, sortOrder);
+    }
+
+    // Delete User
+    // Hide delete options
+    $(document).on("change", ".user-checkbox", function () {
+        const deleteStaff = $(".delete-staff");
+        if ($(this).is(":checked")) {
+            deleteStaff.show();
+        } else {
+            deleteStaff.hide();
+        }
+    });
+
+    function deleteUsers(id) {
+        const url = `${API_URL}?ids=${id}`;
+        const headers = {
+            Authorization: TOKEN,
+            "Content-Type": CONTENT_TYPE,
+        };
+        $.ajax({
+            url: url,
+            type: "DELETE",
+            headers,
+            success: function () {
+                // Refresh the user list
+                fetchUsers(currentPage, searchQuery, sortOrder);
+            },
+            error: function (xhr, status, error) {
+                console.log(`Failed to delete users: ${error}`);
+                $("#confirmDeleteModal").modal("hide");
+            },
+        });
+    }
+
+    function handleDeleteBtnClick(event, userId) {
+        event.stopPropagation();
+        $("#confirmDeleteModal").modal("show");
+        $("#confirmDeleteBtn")
+            .off("click")
+            .on("click", function () {
+                deleteUsers([userId]);
+                $("#confirmDeleteModal").modal("hide");
+            });
+    }
+
+    function handleDeleteAllBtnClick(event) {
+        event.stopPropagation();
+        const selectedUserIds = getSelectedUserIds();
+        if (selectedUserIds.length > 0) {
+            $("#confirmDeleteModal").modal("show");
+            $("#confirmDeleteBtn")
+                .off("click")
+                .on("click", function () {
+                    deleteUsers(selectedUserIds);
+                    $(".delete-staff").hide();
+                    $("#confirmDeleteModal").modal("hide");
+                });
+        }
+    }
+
+    function handleUncheckAllBtnClick(event) {
+        event.stopPropagation();
+        $(".delete-staff").hide();
+        $(".user-checkbox").prop("checked", false);
+    }
+
+    function handleCheckAllBtnClick(event) {
+        event.stopPropagation();
+        $(".user-checkbox").prop("checked", true);
+    }
+
+    $(".delete-btn").on("click", handleDeleteAllBtnClick);
+
+    $(".uncheck-btn").on("click", handleUncheckAllBtnClick);
+
+    $(".select-all-btn").on("click", handleCheckAllBtnClick);
+
+    // Handling delete button click in user list
+    $("#user-list").on("click", ".delete-user-btn", function (event) {
+        const userId = $(this)
+            .closest(".list-users")
+            .attr("id")
+            .split("-")
+            .pop();
+        handleDeleteBtnClick(event, userId);
+    });
+
+    // Get the user ids of the selected users
+    function getSelectedUserIds() {
+        const selectedUserIds = [];
+        $(".user-checkbox:checked").each(function () {
+            selectedUserIds.push($(this).data("userId"));
+        });
+        return selectedUserIds;
+    }
+});
+
 function getGenderString(gender) {
     switch (gender) {
         case 0:
@@ -194,229 +367,13 @@ function getGenderString(gender) {
     }
 }
 
-// Delete user
-
-function handleDeleteBtnClick(event, id) {
-    event.stopPropagation();
-    deleteUser(id);
-}
-
-function handleDeleteAllBtnClick(event) {
-    const checkboxes = document.querySelectorAll(
-        'input[type="checkbox"][name^="status-checkbox"]'
-    );
-    const checkedIds = [];
-    for (let i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked) {
-            checkedIds.push(checkboxes[i].getAttribute("data-id"));
-        }
-    }
-    if (checkedIds.length > 0) {
-        const confirmation = confirm(
-            `Bạn có chắc muốn xóa ${checkedIds.length} người dùng đã chọn không?`
-        );
-        if (confirmation) {
-            const apiUrl = `http://training.mumesoft.com/api/users?ids=${checkedIds.join(
-                ","
-            )}`;
-            fetch(apiUrl, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${authToken}`,
-                    Accept: "application/json",
-                    "Content-type": "application/json",
-                },
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        checkedIds.forEach((id) => {
-                            $(`#list-users-item-${id}`).remove();
-                        });
-                        const totalRecord =
-                            document.querySelectorAll(".list-users").length;
-                        alert(
-                            `Xóa người dùng thành công! Hiện tại còn ${totalRecord} người dùng.`
-                        );
-                    } else {
-                        throw new Error(
-                            `Request failed with status ${response.status}`
-                        );
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                });
-        }
-    } else {
-        alert("Vui lòng chọn ít nhất một người dùng để xóa.");
-    }
-}
-
-function handleCheckAllBtnClick(event) {
-    const checkboxes = document.querySelectorAll(
-        'input[type="checkbox"][name^="status-checkbox"]'
-    );
-    for (let i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = true;
-    }
-}
-
-function handleUncheckAllBtnClick(event) {
-    const checkboxes = document.querySelectorAll(
-        'input[type="checkbox"][name^="status-checkbox"]'
-    );
-    for (let i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = false;
-    }
-}
-
-// sửa đổi để thêm cảnh báo trước khi xóa và hiển thị số lượng bản ghi còn lại sau khi xóa thành công.
-async function deleteUser(id) {
-    const confirmation = confirm("Bạn có chắc muốn xóa người dùng này không?");
-    if (confirmation) {
-        try {
-            const response = await fetch(
-                `http://training.mumesoft.com/api/users?ids=${id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                        Accept: "application/json",
-                        "Content-type": "application/json",
-                    },
-                }
-            );
-            if (response.ok) {
-                const listItem = document.getElementById(
-                    `list-users-item-${id}`
-                );
-                listItem.remove();
-                const totalRecord =
-                    document.querySelectorAll(".list-users").length;
-                alert(
-                    `Xóa người dùng thành công! Hiện tại còn ${totalRecord} người dùng.`
-                );
-            } else {
-                throw new Error(
-                    `Request failed with status ${response.status}`
-                );
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    }
-}
-
-// function handleUpdateBtnClick(event, id) {
-//     event.stopPropagation();
-//     window.location.href = `add-user.html?id=${id}`;
-// }
-
-// Edit user
-function handleUpdateBtnClick(event, id) {
-    event.stopPropagation();
-    const user = users.find((user) => user.id === id);
-    const html = `
-        <div class="update-user-form">
-            <div class="form-group">
-                <label for="update-name">Họ và tên</label>
-                <input type="text" id="update-name" value="${user.name}" />
-            </div>
-            <div class="form-group">
-                <label for="update-username">Tên đăng nhập</label>
-                <input type="text" id="update-username" value="${
-                    user.username
-                }" />
-            </div>
-            <div class="form-group">
-                <label for="update-email">Email</label>
-                <input type="email" id="update-email" value="${user.email}" />
-            </div>
-            <div class="form-group">
-                <label for="update-birth-date">Ngày sinh</label>
-                <input type="date" id="update-birth-date" value="${
-                    user.birth_date
-                }" />
-            </div>
-            <div class="form-group">
-                <label for="update-gender">Giới tính</label>
-                <select id="update-gender">
-                    <option value="0" ${
-                        user.gender === 0 ? "selected" : ""
-                    }>Nam</option>
-                    <option value="1" ${
-                        user.gender === 1 ? "selected" : ""
-                    }>Nữ</option>
-                    <option value="2" ${
-                        user.gender === 2 ? "selected" : ""
-                    }>Khác</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="update-phone_number">Số điện thoại</label>
-                <input type="text" id="update-phone_number" value="${
-                    user.phone_number
-                }" />
-            </div>
-            <div class="form-group">
-                <button onclick="handleUpdateUserSubmit(event, ${
-                    user.id
-                })">Cập nhật</button>
-            </div>
-        </div>
-    `;
-    $(".update-user-container").html(html);
-    $(".update-user-container").show();
-}
-
-async function handleUpdateUserSubmit(event, id) {
-    event.preventDefault();
-    const name = $("#update-name").val();
-    const username = $("#update-username").val();
-    const email = $("#update-email").val();
-    const birth_date = $("#update-birth-date").val();
-    const gender = $("#update-gender").val();
-    const phone_number = $("#update-phone_number").val();
-    const data = {
-        name,
-        username,
-        email,
-        birth_date,
-        gender,
-        phone_number,
-    };
-    try {
-        const response = await fetch(
-            `http://training.mumesoft.com/api/users/${id}`,
-            {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${authToken}`,
-                    Accept: "application/json",
-                    "Content-type": "application/json",
-                },
-                body: JSON.stringify(data),
-            }
-        );
-        if (response.ok) {
-            const user = await response.json();
-            const listItem = document.getElementById(`list-users-item-${id}`);
-            listItem.querySelector("#update-name").textContent = user.name;
-            listItem.querySelector("#update-username").textContent =
-                user.username;
-            listItem.querySelector("#update-email").textContent = user.email;
-            listItem.querySelector("#update-birth-date").textContent =
-                user.birth_date;
-            listItem.querySelector("#update-gender").textContent =
-                getGenderString(user.gender);
-            listItem.querySelector("#update-phone_number").textContent =
-                user.phone_number;
-            $(".update-user-container").hide();
-            alert("Cập nhật người dùng thành công!");
-        } else {
-            throw new Error(`Request failed with status ${response.status}`);
-        }
-    } catch (error) {
-        console.error("Error:", error);
+function getAvatarString(gender) {
+    switch (gender) {
+        case 0:
+            return "./assets/image/default_male.jpg";
+        case 1:
+            return "./assets/image/default_female.jpg";
+        default:
+            return "./assets/image/default_other.png";
     }
 }

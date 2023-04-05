@@ -1,7 +1,14 @@
 .update-user-container,
 .add-user-container {
-    width: min(100%, 500px);
+    width: min(100%, 1000px);
     margin: 0 auto;
+}
+
+.add-user__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 30px;
 }
 
 form {
@@ -73,7 +80,6 @@ label[for="other"],
 label[for="is_active"] {
     display: inline-block;
     margin-right: 10px;
-    font-weight: normal;
 }
 
 button[type="submit"] {
@@ -91,6 +97,12 @@ button[type="submit"] {
     transition: background-color 0.3s ease-in-out;
 }
 
+.form-submit__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .form-submit {
     outline: none;
     background-color: #1dbfaf;
@@ -99,7 +111,7 @@ button[type="submit"] {
     font-weight: 600;
     color: #fff;
     border: none;
-    width: 100%;
+    width: 40%;
     font-size: 14px;
     border-radius: 8px;
     cursor: pointer;

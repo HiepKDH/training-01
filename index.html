@@ -16,15 +16,21 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
         />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+            crossorigin="anonymous"
+        />
         <link rel="stylesheet" href="./assets/css/reset.css" />
         <link rel="stylesheet" href="./assets/css/styles.css" />
     </head>
-    <body>
+    <body class="custom-body">
         <header class="header">
             <div class="main-content">
-                <div class="header__staff">
+                <div class="header-staff">
                     <!-- Heading -->
-                    <h3 class="heading">Danh sách nhân viên</h3>
+                    <h3 class="header-staff__heading">Danh sách nhân viên</h3>
                     <!-- Action -->
                     <div class="action">
                         <a href="add-user.html" class="action__btn">
@@ -33,7 +39,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="navbar">
+                <div class="navbar-form">
                     <!-- Search form -->
                     <form action="" class="navbar-search">
                         <input
@@ -47,6 +53,7 @@
                             type="submit"
                             id="search-btn"
                             class="navbar-search__btn"
+                            title="Tìm kiếm"
                         >
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
@@ -69,75 +76,156 @@
                     <!-- Sort -->
                     <div class="navbar__sort">
                         <div class="navbar__sort-desc">
-                            <a href="#!">
-                                <div>
-                                    <label for="sort-users"
-                                        >Sắp xếp theo:</label
-                                    >
-                                    <select id="sort-users" name="sort-users">
-                                        <option value="-latest_update_at">
-                                            Mới nhất
-                                        </option>
-                                        <option value="+latest_update_at">
-                                            Cũ nhất
-                                        </option>
-                                    </select>
-                                </div>
-                            </a>
+                            <div>
+                                <label for="sort-users">Sắp xếp theo:</label>
+                                <select id="sort-users" name="sort-users">
+                                    <option value="-latest_update_at">
+                                        Mới nhất
+                                    </option>
+                                    <option value="+latest_update_at">
+                                        Cũ nhất
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="count-staff">
                     <div>
-                        <p>
+                        <div class="count-staff__desc">
                             Có tất cả <span class="num-users"></span> nhân viên
-                        </p>
+                        </div>
                     </div>
+
+                    <!-- Modal for confirming delete -->
+                    <div
+                        class="modal fade"
+                        id="confirmDeleteModal"
+                        tabindex="-1"
+                        role="dialog"
+                        aria-labelledby="confirmDeleteModalLabel"
+                        aria-hidden="true"
+                    >
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1
+                                        class="modal-title"
+                                        id="confirmDeleteModalLabel"
+                                    >
+                                        Bạn có chắc chắn muốn xóa mục đã chọn
+                                    </h1>
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
+                                <!-- <div class="modal-body">
+                                    Bạn có chắc chắn muốn xóa mục đã chọn
+                                </div> -->
+                                <div class="modal-footer">
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        data-bs-dismiss="modal"
+                                    >
+                                        Thoát
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="confirmDeleteBtn"
+                                    >
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remove 1 or more users -->
                     <div class="delete-staff">
-                        <span onclick="handleDeleteAllBtnClick(event)"
-                            >Xóa</span
-                        >
+                        <span class="delete-btn">Xóa</span>
                         hoặc
-                        <span onclick="handleUncheckAllBtnClick(event)"
-                            >Bỏ chọn</span
-                        >
+                        <span class="uncheck-btn">Bỏ Chọn</span>
                         hoặc
-                        <span
-                            onclick="handleCheckAllBtnClick(event)"
-                            id="checkbox-all"
-                            >Chọn tất cả</span
-                        >
+                        <span class="select-all-btn">Chọn tất cả</span>
                     </div>
                 </div>
             </div>
         </header>
         <main>
             <div class="main-content">
-                <div class="users-container"></div>
-                <div class="list-staff" id="list-users"></div>
+                <div id="user-list"></div>
             </div>
         </main>
         <footer>
             <div class="main-content">
-                <div class="row">
-                    <div class="row__quantity">
-                        <ul class="row__quantity-info">
-                            <li>Hiển thị:</li>
-                            <span class="num-users-page">
-                                25<i class="fa-solid fa-angle-down"></i>
-                            </span>
-                            <li>nhân viên/ trang</li>
-                        </ul>
+                <div class="row__quantity">
+                    <div class="row__quantity-info">
+                        <label for="employee-count">Hiển thị:</label>
+                        <select id="employee-count" name="employee-count">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                        <span>nhân viên/ trang</span>
                     </div>
-                    <div class="row__page">
-                        <a href="#!">Trước</a>
-                        <span class="pagination-container"></span>
-                        <a href="#!">Sau</a>
+                    <div class="pagination__item">
+                        <div
+                            class="pagination__item-btn"
+                            id="startBtn"
+                            title="Về trang đầu"
+                        >
+                            <i
+                                class="fa-solid fa-angles-left pagination__item-icon"
+                            ></i>
+                        </div>
+                        <div
+                            class="pagination__item-btn prevBtn"
+                            id="prev-page"
+                            title="Trước"
+                        >
+                            <i
+                                class="fa-solid fa-angle-left pagination__item-icon"
+                            ></i>
+                        </div>
+                        <div
+                            id="pagination"
+                            class="pagination__page-link"
+                        ></div>
+                        <div
+                            class="pagination__item-btn nextBtn"
+                            id="next-page"
+                            title="Sau"
+                        >
+                            <i
+                                class="fa-solid fa-angle-right pagination__item-icon"
+                            ></i>
+                        </div>
+                        <div
+                            class="pagination__item-btn"
+                            id="endBtn"
+                            title="Tới trang cuối"
+                        >
+                            <i
+                                class="fa-solid fa-angles-right pagination__item-icon"
+                            ></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </footer>
-        <script src="./assets/js/jquery-3.6.0.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="./assets/js/main.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0-alpha3/js/bootstrap.min.js"
+            integrity="sha512-wOLiP6uL5tNrV1FiutKtAyQGGJ1CWAsqQ6Kp2XZ12/CvZxw8MvNJfdhh0yTwjPIir4SWag2/MHrseR7PRmNtvA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
     </body>
 </html>
