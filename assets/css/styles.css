@@ -161,10 +161,12 @@ html {
     cursor: pointer;
 }
 
-.navbar__status-lock {
-    font-size: 1.4rem;
-    color: #bf360c;
+#lock-icon {
     cursor: pointer;
+}
+
+.locked {
+    color: #bf360c;
 }
 
 .navbar__sort {
@@ -333,7 +335,7 @@ html {
 .list-users__name,
 .list-users__email,
 .list-users__user-name {
-    width: 90%;
+    width: 100%;
     display: inline-flex;
     align-items: baseline;
 }
@@ -366,9 +368,9 @@ html {
 }
 
 .list-users__action {
-    gap: 50px;
     display: flex;
-    margin-right: 30px;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .list-users__update {
@@ -429,16 +431,26 @@ html {
     rotate: 45deg;
 }
 
-.row__item {
+.row__item-header {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    width: 900px;
+    justify-content: center;
+    column-gap: 25px;
+}
+
+.row__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 1100px;
     max-width: calc(100% - 40px);
 }
 
 .row__item-info {
-    width: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 950px;
     max-width: calc(100% - 40px);
 }
 
@@ -478,4 +490,118 @@ html {
 .active {
     color: #fff;
     background-color: #0064f9;
+}
+
+/* Edit user modal */
+.edit-user__container {
+    width: min(100%, 1000px);
+    margin: 0 auto;
+}
+
+.close-user-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 10px 0 0;
+}
+
+.edit-user__heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+    background: -webkit-linear-gradient(
+        225deg,
+        #ff3cac 0%,
+        #784ba0 50%,
+        #2b86c5 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+    font-size: 2rem;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
+    display: block;
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-shadow: none;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input[type="date"] {
+    font-size: 15px;
+    padding: 5px;
+}
+
+.form-group label[for="male"],
+.form-group label[for="female"],
+.form-group label[for="other"],
+.form-group label[for="is_active"] {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.form-group button[type="submit"] {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.form-message {
+    text-align: left;
+    font-size: 1.3rem;
+    line-height: 1.6rem;
+    padding: 4px 0 0;
+}
+
+.form-control:hover {
+    border-color: #1dbfaf;
+}
+
+.form-group.invalid .form-control {
+    border-color: #f33a58;
+}
+
+.form-group.invalid .form-message {
+    color: #f33a58;
+}
+
+.modal-content {
+    width: min(100%, 1000px);
+    margin: 0 auto;
+}
+
+.footer__item-btn [type="button"],
+.form-submit__btn [type="submit"] {
+    font-size: 1.4rem;
 }

@@ -1,95 +1,3 @@
-function addUser() {
-    const name = document.querySelector('input[name="name"]').value;
-    const email = document
-        .querySelector('input[name="email"]')
-        .value.toLowerCase();
-    const username = document.querySelector('input[name="username"]').value;
-    const password = document.querySelector('input[name="password"]').value;
-    const password_confirmation = document.querySelector(
-        'input[name="password_confirmation"]'
-    ).value;
-    const birth_date = document.querySelector('input[name="birth_date"]').value;
-    const phone_number = document.querySelector(
-        'input[name="phone_number"]'
-    ).value;
-    const gender = document.querySelector('input[name="gender"]').value;
-    const is_active = document.getElementById("is_active").value;
-    const description = document.getElementById("description").value;
-    const avatar = document.querySelector('input[name="avatar"]').files[0]; // get the file object
-    console.log(avatar);
-    const role_id = document.getElementById("role_id").value;
-
-    const authToken = "5wYlmkDfIpSZpUzEN1viAbzc1ubmBMeaWYh26IAu";
-    const newUser = new FormData(); // create a new FormData object
-    newUser.append("username", username);
-    newUser.append("password", password);
-    newUser.append("password_confirmation", password_confirmation);
-    newUser.append("name", name);
-    newUser.append("birth_date", birth_date);
-    newUser.append("phone_number", phone_number);
-    newUser.append("role_id", role_id);
-    newUser.append("gender", gender);
-    newUser.append("is_active", is_active);
-    newUser.append("email", email);
-    newUser.append("description", description);
-    newUser.append("avatar", avatar, avatar.name); // append the file object with its name
-
-    if (!avatar.type.includes("image")) {
-        // check if the file is an image
-        alert("File ảnh không hợp lệ. Vui lòng chọn file ảnh khác.");
-        return;
-    }
-
-    fetch("http://training.mumesoft.com/api/users", {
-        method: "POST",
-        body: newUser, // use the FormData object as the body
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-            Accept: "application/json",
-        },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            alert("Tạo tài khoản thành công!");
-            window.location.href = "index.html";
-        })
-        .catch((error) => {
-            console.error(error);
-            alert("Tài khoản đã tồn tại. Vui lòng chọn tên người dùng khác.");
-        });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    Validator({
-        form: "#form-1",
-        formGroupSelector: ".form-group",
-        errorSelector: ".form-message",
-        rules: [
-            Validator.isRequired("#name", "Vui lòng nhập tên đầy đủ của bạn"),
-            Validator.isEmail("#email"),
-            Validator.isRequired(
-                "#username",
-                "Vui lòng nhập tên người dùng của bạn"
-            ),
-            Validator.minLength("#password", 6),
-            Validator.isRequired("#password_confirmation"),
-            Validator.isConfirmed(
-                "#password_confirmation",
-                function () {
-                    return document.querySelector("#form-1 #password").value;
-                },
-                "Mật khẩu nhập lại không chính xác"
-            ),
-        ],
-        onSubmit: addUser,
-    });
-});
-
 // Đối tượng `Validator`
 function Validator(options) {
     function getParent(element, selector) {
@@ -257,6 +165,18 @@ Validator.isEmail = function (selector, message) {
             return regex.test(value)
                 ? undefined
                 : message || "Trường này phải là email";
+        },
+    };
+};
+
+Validator.isPhoneNumber = function (selector, message) {
+    return {
+        selector: selector,
+        test: function (value) {
+            var regex = /^(84|\+84|0)(3\d{8}|5\d{8}|7\d{8}|8\d{8}|9\d{8})$/;
+            return regex.test(value)
+                ? undefined
+                : message || "Trường này phải là số điện thoại";
         },
     };
 };

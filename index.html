@@ -23,6 +23,7 @@
             crossorigin="anonymous"
         />
         <link rel="stylesheet" href="./assets/css/reset.css" />
+        <!-- <link rel="stylesheet" href="add-user.css" /> -->
         <link rel="stylesheet" href="./assets/css/styles.css" />
     </head>
     <body class="custom-body">
@@ -50,7 +51,7 @@
                         />
                         <!-- Submit button -->
                         <button
-                            type="submit"
+                            type="button"
                             id="search-btn"
                             class="navbar-search__btn"
                             title="Tìm kiếm"
@@ -71,7 +72,19 @@
                             id="status-checkbox"
                             name="checkbox"
                         />
-                        <i class="fa-solid fa-lock navbar__status-lock"></i>
+                        <label for="lock-checkbox">
+                            <i
+                                id="lock-icon"
+                                class="fa-solid fa-lock"
+                                title="Khóa"
+                            ></i>
+                        </label>
+                        <input
+                            hidden
+                            type="checkbox"
+                            id="lock-checkbox"
+                            name="lock-checkbox"
+                        />
                     </div>
                     <!-- Sort -->
                     <div class="navbar__sort">
@@ -219,8 +232,208 @@
                 </div>
             </div>
         </footer>
+        <!-- Modal Edit User -->
+        <div
+            class="modal fade bd-example-modal-lg"
+            id="updateUserModal"
+            tabindex="-1"
+            aria-labelledby="updateUserModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="close-user-btn">
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Đóng"
+                        ></button>
+                    </div>
+                    <!-- <div class="edit-user__title"> -->
+                    <div class="edit-user__heading">
+                        <h3 class="modal-title" id="updateUserModalLabel">
+                            Cập nhật người dùng
+                        </h3>
+                    </div>
+                    <!-- </div> -->
+                    <div class="modal-body">
+                        <form
+                            action=""
+                            method="PUT"
+                            class="form"
+                            id="form-update-user"
+                        >
+                            <div class="row">
+                                <div class="col-sm-6 col-xl-6">
+                                    <div class="form-group">
+                                        <label for="username"
+                                            >Tên người dùng:</label
+                                        >
+                                        <input
+                                            type="text"
+                                            id="username"
+                                            name="username"
+                                            class="form-control"
+                                            placeholder="VD: hiepkd"
+                                            required
+                                        />
+                                        <span class="form-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="name">Tên đầy đủ:</label>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            class="form-control"
+                                            placeholder="VD: Khuất Đình Hiệp"
+                                            required
+                                        />
+                                        <span class="form-message"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6 col-xl-6">
+                                    <div class="form-group">
+                                        <label for="email"
+                                            >Địa chỉ email:</label
+                                        >
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            class="form-control"
+                                            placeholder="VD: khuatdinhhiep@gmail.com"
+                                        />
+                                        <span class="form-message"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="phone_number"
+                                            >Số điện thoại:</label
+                                        >
+                                        <input
+                                            type="tel"
+                                            id="phone_number"
+                                            name="phone_number"
+                                            class="form-control"
+                                            placeholder="VD: 0987654321"
+                                        />
+                                        <span class="form-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-sm-6 col-xl-4">
+                                    <label for="is_active">Trạng thái:</label>
+                                    <select
+                                        id="is_active"
+                                        name="is_active"
+                                        required
+                                    >
+                                        <option value="0">
+                                            Không hoạt động
+                                        </option>
+                                        <option value="1">Hoạt động</option>
+                                    </select>
+                                    <span class="form-message"></span>
+                                </div>
+                                <div class="form-group col-sm-6 col-xl-4">
+                                    <label for="birth_date">Ngày sinh:</label>
+                                    <input
+                                        type="date"
+                                        id="birth_date"
+                                        name="birth_date"
+                                        class="form-control"
+                                    />
+                                    <span class="form-message"></span>
+                                </div>
+                                <div class="form-group col-sm-6 col-xl-4">
+                                    <label for="role_id">Vai trò:</label>
+                                    <select id="role_id" name="role_id">
+                                        <option value="1">User</option>
+                                        <option value="2">Admin</option>
+                                    </select>
+                                    <span class="form-message"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Giới tính:</label>
+                                <input
+                                    type="radio"
+                                    id="male"
+                                    name="gender"
+                                    value="0"
+                                />
+                                <label for="male">Nam</label>
+                                <input
+                                    type="radio"
+                                    id="female"
+                                    name="gender"
+                                    value="1"
+                                />
+                                <label for="female">Nữ</label>
+                                <input
+                                    type="radio"
+                                    id="other"
+                                    name="gender"
+                                    value="2"
+                                />
+                                <label for="other">Khác</label>
+                                <span class="form-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Mô tả:</label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                ></textarea>
+                                <span class="form-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="avatar">Ảnh đại diện:</label>
+                                <input
+                                    type="file"
+                                    id="avatar"
+                                    name="avatar"
+                                    accept="avatar/gif, avatar/jpeg, avatar/png"
+                                />
+                                <span class="form-message"></span>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="footer__item-btn">
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        data-bs-dismiss="modal"
+                                    >
+                                        Đóng
+                                    </button>
+                                </div>
+                                <div class="form-submit__btn">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary form-submit"
+                                        id="update-user-btn"
+                                    >
+                                        Cập nhật
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="./assets/js/main.js"></script>
+        <script src="./assets/js/validator.js"></script>
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0-alpha3/js/bootstrap.min.js"
             integrity="sha512-wOLiP6uL5tNrV1FiutKtAyQGGJ1CWAsqQ6Kp2XZ12/CvZxw8MvNJfdhh0yTwjPIir4SWag2/MHrseR7PRmNtvA=="
