@@ -19,7 +19,6 @@ $(document).ready(function () {
         fetch(apiUrl, { headers })
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
                 const userList = data.data
                     .filter((user) => {
                         if ($("#status-checkbox").prop("checked")) {
@@ -37,17 +36,17 @@ $(document).ready(function () {
                                 user.email &&
                                 user.phone_number &&
                                 user.name
-                                    .toUpperCase()
-                                    .includes(searchQuery.toUpperCase())) ||
+                                    .toLowerCase()
+                                    .includes(searchQuery.toLowerCase())) ||
                             user.username
-                                .toUpperCase()
-                                .includes(searchQuery.toUpperCase()) ||
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase()) ||
                             user.phone_number
-                                ?.toUpperCase()
-                                .includes(searchQuery.toUpperCase()) ||
+                                ?.toLowerCase()
+                                .includes(searchQuery.toLowerCase()) ||
                             user.email
-                                ?.toUpperCase()
-                                .includes(searchQuery.toUpperCase())
+                                ?.toLowerCase()
+                                .includes(searchQuery.toLowerCase())
                         );
                     })
                     .map(getUserHtml)
@@ -62,14 +61,17 @@ $(document).ready(function () {
                     $(".list-users__status-check :not([checked])")
                         .closest(".list-users", ".status-lock")
                         .show();
-                    $("#lock-icon").toggleClass("locked");
+                    if (!$("#lock-icon").hasClass("locked")) {
+                        $("#lock-icon").addClass("locked");
+                    }
                 } else {
                     $(".list-users__status-check")
                         .closest(".list-users")
                         .show();
+                    if ($("#lock-icon").hasClass("locked")) {
+                        $("#lock-icon").removeClass("locked");
+                    }
                 }
-
-                // $("#lock-checkbox").click(function () {});
 
                 const totalPages = Math.ceil(data.total / pageSize);
                 let paginationHtml = "";
@@ -414,62 +416,84 @@ $(document).ready(function () {
                 $("#is_active").val(users.is_active);
                 $("#role_id").val(users.role_id);
                 $("#description").val(users.description);
-                $("#avatar").val();
+                $("#avatar").val("");
             })
             .catch((error) => console.log(error));
-    }
 
-    Validator({
-        form: "#form-update-user",
-        formGroupSelector: ".form-group",
-        errorSelector: ".form-message",
-        rules: [
-            Validator.isRequired("#name", "Vui lòng nhập tên đầy đủ của bạn"),
-            Validator.isEmail("#email"),
-            Validator.isRequired(
-                "#username",
-                "Vui lòng nhập tên người dùng của bạn"
-            ),
-            Validator.isPhoneNumber("#phone_number"),
-        ],
-        onSubmit: function () {
-            const headers = {
-                Authorization: TOKEN,
-                "Content-Type": CONTENT_TYPE,
-            };
-            const reader = new FileReader();
-            reader.readAsDataURL($("#avatar").prop("files")[0]);
-            reader.onload = function () {
-                const base64 = reader.result.split(",")[1];
+        // Check and validate input data
+        Validator({
+            form: "#form-update-user",
+            formGroupSelector: ".form-group",
+            errorSelector: ".form-message",
+            rules: [
+                Validator.isRequired(
+                    "#name",
+                    "Vui lòng nhập tên đầy đủ của bạn"
+                ),
+                Validator.isEmail("#email"),
+                Validator.isRequired(
+                    "#username",
+                    "Vui lòng nhập tên người dùng của bạn"
+                ),
+                Validator.isPhoneNumber("#phone_number"),
+            ],
+            onSubmit: function () {
+                const headers = {
+                    Authorization: TOKEN,
+                    "Content-Type": CONTENT_TYPE,
+                };
 
-                fetch(`${API_URL}/${userId}`, {
-                    method: "PUT",
-                    headers: headers,
-                    body: JSON.stringify({
-                        name: $("#name").val(),
-                        username: $("#username").val(),
-                        email: $("#email").val(),
-                        phone_number: $("#phone_number").val(),
-                        gender: $('input[type="radio"][name="gender"]')
-                            .filter(":checked")
-                            .val(),
-                        is_active: $("#is_active").val(),
-                        role_id: $("#role_id").val(),
-                        birth_date: $("#birth_date").val(),
-                        description: $("#description").val(),
-                        avatar: base64,
-                    }),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        console.log(data);
-                        $("#updateUserModal").modal("hide");
-                        renderUsers(currentPage, searchQuery, sortOrder);
+                // convert avatar to base64
+                const fileAvt = $("#avatar")[0].files[0];
+                let base64Promise = Promise.resolve(null);
+
+                if (fileAvt) {
+                    base64Promise = new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(fileAvt);
+                        reader.onload = function () {
+                            const base64 = reader.result;
+                            const file = base64.split(";")[0].split(":")[1];
+                            const base64Data = base64.split(",")[1];
+                            const imageData = `data:${file};base64,${base64Data}`;
+                            resolve(imageData);
+                        };
+                        reader.onerror = function (error) {
+                            console.log("Error: ", error);
+                            reject(error);
+                        };
+                    });
+                }
+
+                base64Promise.then((base64) => {
+                    fetch(`${API_URL}/${userId}`, {
+                        method: "PUT",
+                        headers: headers,
+                        body: JSON.stringify({
+                            name: $("#name").val(),
+                            username: $("#username").val(),
+                            email: $("#email").val(),
+                            phone_number: $("#phone_number").val(),
+                            gender: $('input[type="radio"][name="gender"]')
+                                .filter(":checked")
+                                .val(),
+                            is_active: $("#is_active").val(),
+                            role_id: $("#role_id").val(),
+                            birth_date: $("#birth_date").val(),
+                            description: $("#description").val(),
+                            avatar: base64,
+                        }),
                     })
-                    .catch((error) => console.log(error));
-            };
-        },
-    });
+                        .then((response) => response.json())
+                        .then((data) => {
+                            $("#updateUserModal").modal("hide");
+                            renderUsers(currentPage, searchQuery, sortOrder);
+                        })
+                        .catch((error) => console.log(error));
+                });
+            },
+        });
+    }
 
     $("#user-list").on("click", ".edit-user-btn", function (event) {
         const userId = $(this)

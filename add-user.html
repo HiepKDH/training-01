@@ -233,12 +233,15 @@
                             document.getElementById("is_active").value;
                         const description =
                             document.getElementById("description").value;
-                        const avatar = document.querySelector(
-                            'input[name="avatar"]'
-                        ).files[0]; // get the file object
-                        console.log(avatar);
                         const role_id =
                             document.getElementById("role_id").value;
+                        const avatarInput = document.querySelector(
+                            'input[name="avatar"]'
+                        );
+                        const avatar =
+                            avatarInput.files.length > 0
+                                ? avatarInput.files[0]
+                                : null;
 
                         const authToken =
                             "5wYlmkDfIpSZpUzEN1viAbzc1ubmBMeaWYh26IAu";
@@ -257,14 +260,11 @@
                         newUser.append("is_active", is_active);
                         newUser.append("email", email);
                         newUser.append("description", description);
-                        newUser.append("avatar", avatar, avatar.name); // append the file object with its name
 
-                        if (!avatar.type.includes("image")) {
-                            // check if the file is an image
-                            alert(
-                                "File ảnh không hợp lệ. Vui lòng chọn file ảnh khác."
-                            );
-                            return;
+                        if (!avatar) {
+                            newUser.append("avatar", "");
+                        } else if (avatar.type.includes("image")) {
+                            newUser.append("avatar", avatar, avatar.name);
                         }
 
                         fetch("http://training.mumesoft.com/api/users", {
