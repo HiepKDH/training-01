@@ -12,6 +12,16 @@ $(document).ready(function () {
         if (searchQuery) {
             apiUrl += `&search=${searchQuery}`;
         }
+        const is_active_checked =
+            localStorage.getItem("statusCheckboxChecked") === "true";
+        const not_is_active_checked =
+            localStorage.getItem("lockCheckboxChecked") === "true";
+        if (is_active_checked) {
+            apiUrl += `&is_active=1`;
+        }
+        if (not_is_active_checked) {
+            apiUrl += `&is_active=0`;
+        }
         const headers = {
             Authorization: TOKEN,
             "Content-Type": CONTENT_TYPE,
@@ -19,6 +29,12 @@ $(document).ready(function () {
         fetch(apiUrl, { headers })
             .then((response) => response.json())
             .then((data) => {
+                const searchFields = [
+                    "name",
+                    "username",
+                    "phone_number",
+                    "email",
+                ];
                 const userList = data.data
                     .filter((user) => {
                         if ($("#status-checkbox").prop("checked")) {
@@ -30,21 +46,8 @@ $(document).ready(function () {
                         }
                     })
                     .filter((user) => {
-                        return (
-                            (user.name &&
-                                user.username &&
-                                user.email &&
-                                user.phone_number &&
-                                user.name
-                                    .toLowerCase()
-                                    .includes(searchQuery.toLowerCase())) ||
-                            user.username
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase()) ||
-                            user.phone_number
-                                ?.toLowerCase()
-                                .includes(searchQuery.toLowerCase()) ||
-                            user.email
+                        return searchFields.some((field) =>
+                            user[field]
                                 ?.toLowerCase()
                                 .includes(searchQuery.toLowerCase())
                         );
@@ -53,24 +56,42 @@ $(document).ready(function () {
                     .join("");
                 $("#user-list").html(userList);
 
-                // Show/hide list-users__status-check based on lock-checkbox
-                if ($("#lock-checkbox").prop("checked")) {
+                if (data.total === 0) {
+                    console.log(data.total);
+                    $(".row__quantity").hide();
+                } else {
+                    $(".row__quantity").show();
+                }
+
+                // Save the value of the active and lock checkboxes to local storage
+                localStorage.setItem(
+                    "statusCheckboxChecked",
+                    is_active_checked
+                );
+                localStorage.setItem(
+                    "lockCheckboxChecked",
+                    not_is_active_checked
+                );
+
+                if (not_is_active_checked) {
                     $(".list-users__status-check [checked]")
                         .closest(".list-users")
                         .hide();
                     $(".list-users__status-check :not([checked])")
-                        .closest(".list-users", ".status-lock")
+                        .closest(".list-users")
                         .show();
-                    if (!$("#lock-icon").hasClass("locked")) {
-                        $("#lock-icon").addClass("locked");
-                    }
+                    $("#lock-icon").addClass("locked");
                 } else {
                     $(".list-users__status-check")
                         .closest(".list-users")
                         .show();
-                    if ($("#lock-icon").hasClass("locked")) {
-                        $("#lock-icon").removeClass("locked");
-                    }
+                    $("#lock-icon").removeClass("locked");
+                }
+
+                if (is_active_checked) {
+                    $(".status-checkbox").css("visibility", "visible");
+                } else {
+                    $(".status-checkbox").css("visibility", "hidden");
                 }
 
                 const totalPages = Math.ceil(data.total / pageSize);
@@ -183,9 +204,12 @@ $(document).ready(function () {
                     </div>
                 </div>
                     <div class="list-users__status-check">
-                            <label for="status-check-${
-                                user.id
-                            }" title="Đang hoạt động" ${user.is_active ? "checked" : "hidden"}></label>
+                        <label for="status-check-${
+                            user.id
+                        }" title="Đang hoạt động" ${user.is_active ? "checked" : "hidden"}></label>
+                        <span class="fa-solid fa-circle-xmark list-users__lock-check" title="Không hoạt động" ${
+                            !user.is_active ? "checked" : "hidden"
+                        }></span>
                     </div>
             </div>
         </div>
@@ -210,14 +234,18 @@ $(document).ready(function () {
         $("#lock-checkbox").prop("checked", lockCheckboxChecked == "true");
     }
 
-    $("#status-checkbox").on("change", function () {
-        localStorage.setItem("#status-checkbox", "statusCheckboxChecked");
-        renderUsers(currentPage, searchQuery, sortOrder);
-    });
-
-    $("#lock-checkbox").on("change", function () {
-        localStorage.setItem("#lock-checkbox", "lockCheckboxChecked");
-        renderUsers(currentPage, searchQuery, sortOrder);
+    $("#status-checkbox, #lock-checkbox").on("change", function () {
+        currentPage = 1;
+        localStorage.setItem("currentPage", currentPage);
+        localStorage.setItem(
+            "statusCheckboxChecked",
+            $("#status-checkbox").prop("checked")
+        );
+        localStorage.setItem(
+            "lockCheckboxChecked",
+            $("#lock-checkbox").prop("checked")
+        );
+        renderUsers();
     });
 
     // handle select onchange event
@@ -229,12 +257,29 @@ $(document).ready(function () {
         renderUsers(currentPage, searchQuery, sortOrder);
     });
 
-    $("#search-btn").on("click", function (event) {
-        event.preventDefault();
-        searchQuery = $("#search-input").val().toLowerCase();
-        renderUsers(currentPage, searchQuery, sortOrder);
+    // Search users
+    const searchInput = $("#search-input");
+    const searchBtn = $("#search-btn");
+
+    searchBtn.on("click", function () {
+        const searchQuery = searchInput.val().trim();
         localStorage.setItem("searchQuery", searchQuery);
-        $("#user-list").html("");
+        searchInput.val("");
+        renderUsers(currentPage, searchQuery, sortOrder);
+    });
+
+    searchInput.on("keydown", function (event) {
+        if (event.keyCode === 13) {
+            const searchQuery = searchInput.val().trim();
+            localStorage.setItem("searchQuery", searchQuery);
+            renderUsers(currentPage, searchQuery, sortOrder);
+        }
+    });
+
+    $(".navbar-search__clear").on("click", function () {
+        searchInput.val("");
+        localStorage.setItem("searchQuery", "");
+        renderUsers(currentPage, "", sortOrder);
     });
 
     // store user sort selection state
@@ -292,15 +337,6 @@ $(document).ready(function () {
     }
 
     // Delete User
-    // Hide delete options
-    $(document).on("change", ".user-checkbox", function () {
-        const deleteStaff = $(".delete-staff");
-        if ($(this).is(":checked")) {
-            deleteStaff.show();
-        } else {
-            deleteStaff.hide();
-        }
-    });
 
     function deleteUsers(id) {
         const url = `${API_URL}?ids=${id}`;
@@ -342,7 +378,7 @@ $(document).ready(function () {
                 .off("click")
                 .on("click", function () {
                     deleteUsers(selectedUserIds);
-                    $(".delete-staff").hide();
+                    $(".delete-staff-btn").css("visibility", "hidden");
                     $("#confirmDeleteModal").modal("hide");
                 });
         }
@@ -350,13 +386,38 @@ $(document).ready(function () {
 
     function handleUncheckAllBtnClick(event) {
         event.stopPropagation();
-        $(".delete-staff").hide();
+        $(".delete-staff-btn").css("visibility", "hidden");
         $(".user-checkbox").prop("checked", false);
     }
 
     function handleCheckAllBtnClick(event) {
         event.stopPropagation();
         $(".user-checkbox").prop("checked", true);
+        $(".select-all-btn").hide();
+        $(".or-select-all").css("display", "none");
+    }
+
+    // Hide delete options
+    $(document).on("change", ".user-checkbox", function () {
+        const deleteStaff = $(".delete-staff-btn");
+        if ($(".user-checkbox:checked").length > 0) {
+            deleteStaff.css("visibility", "visible");
+        } else {
+            deleteStaff.css("visibility", "hidden");
+        }
+        checkSelectedCheckbox();
+    });
+
+    function checkSelectedCheckbox() {
+        const selectedCount = $(".user-checkbox:checked").length;
+        const totalCount = $(".user-checkbox").length;
+        if (selectedCount === totalCount) {
+            $(".select-all-btn").hide();
+            $(".or-select-all").css("display", "none");
+        } else {
+            $(".select-all-btn").show();
+            $(".or-select-all").css("display", "block");
+        }
     }
 
     $(".delete-btn").on("click", handleDeleteAllBtnClick);

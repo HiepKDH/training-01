@@ -141,11 +141,77 @@ html {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    column-gap: 10px;
+    column-gap: 8px;
 }
 
 .navbar__status span {
     font-size: 1.2rem;
+}
+
+.dropbtn {
+    color: #000;
+    font-size: 1.4rem;
+    border: none;
+    cursor: pointer;
+    background: none;
+    transition: all 300ms ease;
+}
+
+.dropbtn::after {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 0.355em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    border-radius: 4px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content label {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content label:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #f1f1f1;
+}
+
+.status-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #078a2e;
+    visibility: hidden;
 }
 
 .navbar__status-check {
@@ -159,10 +225,6 @@ html {
     border-radius: 50%;
     color: white;
     background-color: green;
-    cursor: pointer;
-}
-
-#lock-icon {
     cursor: pointer;
 }
 
@@ -203,19 +265,29 @@ html {
     margin-left: 14px;
 }
 
-.delete-staff {
-    display: none;
+/* .delete-btn {
+    display: flex;
+} */
+
+.delete-staff-btn {
+    display: flex;
+    align-items: center;
+    visibility: hidden;
     margin-right: 10px;
 }
 
-.delete-staff span {
+.delete-staff .delete-btn,
+.delete-staff .uncheck-btn,
+.delete-staff .select-all-btn {
     font-style: italic;
-}
-
-.delete-staff span {
     color: blue;
     cursor: pointer;
     padding: 3px;
+}
+
+.delete-staff span {
+    padding: 3px;
+    color: #666;
 }
 
 .list-staff {
@@ -264,6 +336,10 @@ html {
     position: relative;
 }
 
+#user-list {
+    border: 1px solid #090700;
+}
+
 .row__quantity {
     height: 33px;
     display: flex;
@@ -296,7 +372,7 @@ html {
 
 .list-users {
     position: relative;
-    border: 1px solid #ccc;
+    border-bottom: 1px solid #666;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -319,6 +395,14 @@ html {
 .list-users__heading {
     display: flex;
     align-items: center;
+}
+
+.user-checkbox {
+    cursor: pointer;
+}
+
+.list-users {
+    min-height: 10px;
 }
 
 .list-users i {
@@ -394,13 +478,13 @@ html {
 /* Status check */
 .list-users__status-check {
     position: absolute;
-    right: 2px;
-    bottom: 2px;
+    right: 4px;
+    bottom: -1px;
     z-index: 3;
 }
 
 .list-users__status-check label {
-    right: 2px;
+    right: -1px;
     bottom: -2px;
     position: relative;
 }
@@ -423,13 +507,19 @@ html {
 
 .list-users__status-check label::after {
     position: absolute;
-    top: 2px;
+    top: 6px;
     left: 4px;
     height: 7px;
     width: 4px;
     border-right: 2px solid #fff;
     border-bottom: 2px solid #fff;
     rotate: 45deg;
+}
+
+/* Lock check */
+.list-users__lock-check {
+    font-size: 1.2rem;
+    color: #d92d27;
 }
 
 .row__item-header {
@@ -462,6 +552,7 @@ html {
     justify-content: center;
     padding: 0 15px;
     column-gap: 6px;
+    cursor: pointer;
 }
 
 .pagination__item-btn,
