@@ -113,7 +113,7 @@ html {
 }
 
 .navbar-search__btn {
-    width: 30px;
+    width: 35px;
     border-radius: 0 99px 99px 0;
     color: rgba(22, 24, 35, 0.34);
     font-size: 1.4rem;
@@ -121,7 +121,7 @@ html {
 }
 
 .navbar-search__btn:hover {
-    background: #16182308;
+    background: #dee2e66e;
 }
 
 .navbar-search__clear {
@@ -141,11 +141,12 @@ html {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    column-gap: 8px;
+    column-gap: 14px;
 }
 
-.navbar__status span {
-    font-size: 1.2rem;
+.lock-checkbox {
+    padding: 2px;
+    cursor: pointer;
 }
 
 .dropbtn {
@@ -205,14 +206,36 @@ html {
     background-color: #f1f1f1;
 }
 
-.status-checkbox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    position: relative;
+    cursor: pointer;
+}
+
+input[type="checkbox"]::after {
+    position: absolute;
+    content: "\f111";
+    font-family: "Font Awesome 5 Free";
+    font-size: 14px;
+    color: #666;
+    bottom: -6px;
+    left: -7px;
+}
+
+input[type="checkbox"]:checked::after {
+    font-weight: 800;
+    content: "\f058";
+    color: #078a2e;
+}
+
+/* .status-checkbox__btn {
+    top: -1px;
+    left: -1px;
+    position: absolute;
     font-size: 1.4rem;
     color: #078a2e;
     visibility: hidden;
-}
+} */
 
 .navbar__status-check {
     display: flex;
@@ -257,7 +280,6 @@ html {
     height: 33px;
     font-size: 1.2rem;
     border: 1px solid var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
 }
 
 .count-staff__desc {
@@ -274,6 +296,7 @@ html {
     align-items: center;
     visibility: hidden;
     margin-right: 10px;
+    transition: all 0.15s ease;
 }
 
 .delete-staff .delete-btn,
@@ -338,6 +361,13 @@ html {
 
 #user-list {
     border: 1px solid #090700;
+}
+
+.user-list__text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
 }
 
 .row__quantity {
@@ -426,7 +456,7 @@ html {
 }
 
 .list-users__user-name i {
-    color: #666;
+    color: #666666b8;
 }
 
 .list-users__email {
@@ -496,7 +526,6 @@ html {
 }
 
 .list-users__status-check label:before {
-    z-index: 9;
     width: 12px;
     height: 12px;
     border: 2px solid #078a2e;
@@ -533,6 +562,7 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
+    margin-left: 10px;
     width: 1100px;
     max-width: calc(100% - 40px);
 }
@@ -541,7 +571,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 950px;
+    width: 1000px;
     max-width: calc(100% - 40px);
 }
 

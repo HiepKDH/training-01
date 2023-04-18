@@ -66,7 +66,7 @@
                     </form>
                     <!-- Status -->
                     <div class="navbar__status">
-                        <div class="dropdown">
+                        <!-- <div class="dropdown">
                             <button class="dropbtn">Trạng thái</button>
                             <div class="dropdown-content">
                                 <label for="status-checkbox"
@@ -76,24 +76,23 @@
                                     >Không hoạt động</label
                                 >
                             </div>
-                        </div>
-                        <div class="status-checkbox">
+                        </div> -->
+                        <div>Trạng thái:</div>
+                        <label for="status-checkbox">
+                            <div class="status-checkbox">
+                                <input
+                                    type="checkbox"
+                                    id="status-checkbox"
+                                    name="checkbox"
+                                />
+                            </div>
+                        </label>
+                        <label for="lock-checkbox">
                             <i
-                                class="fa-solid fa-circle-check"
-                                title="Đang hoạt động"
+                                id="lock-icon"
+                                class="fa-solid fa-lock lock-checkbox"
                             ></i>
-                        </div>
-                        <input
-                            hidden
-                            type="checkbox"
-                            id="status-checkbox"
-                            name="checkbox"
-                        />
-                        <i
-                            id="lock-icon"
-                            class="fa-solid fa-lock"
-                            title="Không hoạt động"
-                        ></i>
+                        </label>
                         <input
                             hidden
                             type="checkbox"
@@ -192,7 +191,9 @@
         <main>
             <div class="main-content">
                 <div id="user-list"></div>
-                <div class="user-list__text"></div>
+                <!-- <div class="user-list__text">
+                    Không tìm thấy bất kỳ kết quả nào với từ khóa trên.
+                </div> -->
             </div>
         </main>
         <footer>

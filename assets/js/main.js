@@ -1,11 +1,12 @@
 $(document).ready(function () {
     let API_URL = "http://training.mumesoft.com/api/users";
-    let TOKEN = "Bearer MBczeFfWzzspy1a1C4bs5mAuDCAbo187x5nfwJls";
+    let TOKEN = "Bearer w9oMrFvqAG6fTF1TuWJVGaW8ZE6InrsILlv3Lufq";
     let CONTENT_TYPE = "application/json";
     let pageSize = localStorage.getItem("pageSize") || 5;
     let currentPage = localStorage.getItem("currentPage") || 1;
     let searchQuery = localStorage.getItem("searchQuery") || "";
     let sortOrder = localStorage.getItem("sortOrder") || "+latest_update_at";
+    let displayedUsers = 0;
 
     function renderUsers(page, searchQuery = "", sortOrder = "") {
         let apiUrl = `${API_URL}?page=${page}&page_size=${pageSize}&sort=${sortOrder}`;
@@ -16,11 +17,15 @@ $(document).ready(function () {
             localStorage.getItem("statusCheckboxChecked") === "true";
         const not_is_active_checked =
             localStorage.getItem("lockCheckboxChecked") === "true";
-        if (is_active_checked) {
-            apiUrl += `&is_active=1`;
-        }
-        if (not_is_active_checked) {
-            apiUrl += `&is_active=0`;
+        if (is_active_checked && not_is_active_checked) {
+            // apiUrl;
+        } else {
+            if (is_active_checked) {
+                apiUrl += `&is_active=1`;
+            }
+            if (not_is_active_checked) {
+                apiUrl += `&is_active=0`;
+            }
         }
         const headers = {
             Authorization: TOKEN,
@@ -37,9 +42,13 @@ $(document).ready(function () {
                 ];
                 const userList = data.data
                     .filter((user) => {
-                        if ($("#status-checkbox").prop("checked")) {
+                        const isActiveChecked =
+                            $("#status-checkbox").prop("checked");
+                        const notIsActiveChecked =
+                            $("#lock-checkbox").prop("checked");
+                        if (isActiveChecked && !notIsActiveChecked) {
                             return user.is_active;
-                        } else if ($("#lock-checkbox").prop("checked")) {
+                        } else if (!isActiveChecked && notIsActiveChecked) {
                             return !user.is_active;
                         } else {
                             return true;
@@ -54,13 +63,20 @@ $(document).ready(function () {
                     })
                     .map(getUserHtml)
                     .join("");
-                $("#user-list").html(userList);
-
-                if (data.total === 0) {
-                    console.log(data.total);
+                // Check if userList is empty
+                if (userList === "") {
+                    $("#user-list").html(`
+                            <div class="user-list__text">
+                                Không có dữ liệu phù hợp.
+                            </div>
+                        `);
                     $(".row__quantity").hide();
+                    $(".pagination__item").hide();
                 } else {
+                    // Display userList
+                    $("#user-list").html(userList);
                     $(".row__quantity").show();
+                    $(".pagination__item").show();
                 }
 
                 // Save the value of the active and lock checkboxes to local storage
@@ -88,12 +104,6 @@ $(document).ready(function () {
                     $("#lock-icon").removeClass("locked");
                 }
 
-                if (is_active_checked) {
-                    $(".status-checkbox").css("visibility", "visible");
-                } else {
-                    $(".status-checkbox").css("visibility", "hidden");
-                }
-
                 const totalPages = Math.ceil(data.total / pageSize);
                 let paginationHtml = "";
                 for (let i = 1; i <= totalPages; i++) {
@@ -116,6 +126,7 @@ $(document).ready(function () {
                     .off("click")
                     .on("click", () => {
                         currentPage = totalPages;
+                        localStorage.removeItem("searchQuery");
                         renderUsers(currentPage, searchQuery, sortOrder);
                         localStorage.setItem("currentPage", currentPage);
                     });
@@ -125,6 +136,7 @@ $(document).ready(function () {
                     .on("click", () => {
                         if (currentPage < totalPages) {
                             currentPage++;
+                            localStorage.removeItem("searchQuery");
                             renderUsers(currentPage, searchQuery, sortOrder);
                             localStorage.setItem("currentPage", currentPage);
                         }
@@ -146,7 +158,7 @@ $(document).ready(function () {
                                 }">
                             </div>
                         </div>
-                        <div class="me-5">
+                        <div>
                             <img class="list-users__avatar" src="${
                                 user.avatar
                                     ? user.avatar
@@ -158,12 +170,12 @@ $(document).ready(function () {
                     <div class="col-sm-6 col-lg-3">
                         <div>
                             <div class="p-2 list-users__name line-clamp line-2  break-all" id="update-name">
-                             <i class="fa fa-user" title="Tên"></i>
-                                ${user.name}
+                                <i class="fa fa-user" title="Tên"></i>
+                                    ${user.name}
                             </div>
                             <div class="p-2 list-users__user-name line-clamp line-2 break-all" id="update-username">
-                            <i class="fa fa-user" title="Tên người dùng"></i>
-                                ${user.username}
+                                <i class="fa fa-user" title="Tên người dùng"></i>
+                                    ${user.username}
                             </div>
                         </div>
                     </div>
@@ -188,19 +200,19 @@ $(document).ready(function () {
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-3">
-                          <div class="list-users__action">
-                              <div class="edit-user-btn">
-                                  <a href="#!" class="list-users__update">
-                                      <i class="fa-regular fa-pen-to-square"></i>
-                                          Cập nhật
-                                  </a>
-                              </div>
-                              <div class="delete-user-btn">
-                                  <div class="list-users__action-clear">
-                                      <i class="fa-solid fa-trash-can" title="Xóa"></i>
-                                  </div>
-                              </div>
-                          </div>
+                            <div class="list-users__action">
+                                <div class="edit-user-btn">
+                                    <a href="#!" class="list-users__update">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                            Cập nhật
+                                    </a>
+                                </div>
+                                <div class="delete-user-btn">
+                                    <div class="list-users__action-clear">
+                                        <i class="fa-solid fa-trash-can" title="Xóa"></i>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
                 </div>
                     <div class="list-users__status-check">
@@ -220,8 +232,27 @@ $(document).ready(function () {
 
     // Click on the title reload user
     $(".header-staff__heading").on("click", function () {
+        localStorage.removeItem("searchQuery");
         renderUsers(currentPage);
         $("#user-list").html("");
+    });
+
+    // handle pagination button clicks
+    $("#startBtn").on("click", function () {
+        currentPage = 1;
+        $(".page-link__item").removeClass("active");
+        localStorage.removeItem("searchQuery");
+        renderUsers(currentPage, searchQuery, sortOrder);
+        localStorage.setItem("currentPage", currentPage);
+    });
+
+    $(".prevBtn").on("click", function () {
+        if (currentPage > 1) {
+            currentPage--;
+            localStorage.removeItem("searchQuery");
+            renderUsers(currentPage, searchQuery, sortOrder);
+            $(".page-link__item").removeClass("active");
+        }
     });
 
     // Set default checkbox state from local storage
@@ -264,12 +295,12 @@ $(document).ready(function () {
     searchBtn.on("click", function () {
         const searchQuery = searchInput.val().trim();
         localStorage.setItem("searchQuery", searchQuery);
-        searchInput.val("");
         renderUsers(currentPage, searchQuery, sortOrder);
     });
 
-    searchInput.on("keydown", function (event) {
-        if (event.keyCode === 13) {
+    searchInput.on("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
             const searchQuery = searchInput.val().trim();
             localStorage.setItem("searchQuery", searchQuery);
             renderUsers(currentPage, searchQuery, sortOrder);
@@ -278,8 +309,7 @@ $(document).ready(function () {
 
     $(".navbar-search__clear").on("click", function () {
         searchInput.val("");
-        localStorage.setItem("searchQuery", "");
-        renderUsers(currentPage, "", sortOrder);
+        localStorage.removeItem("searchQuery");
     });
 
     // store user sort selection state
@@ -291,6 +321,7 @@ $(document).ready(function () {
 
     $("#sort-users").on("change", function (event) {
         const sortOrder = event.target.value;
+        localStorage.removeItem("searchQuery");
         localStorage.setItem(SORT_ORDER_KEY, sortOrder);
         $(".page-link__item").removeClass("active");
         renderUsers(currentPage, searchQuery, sortOrder);
@@ -303,24 +334,10 @@ $(document).ready(function () {
         if (pageNumber !== currentPage) {
             renderUsers(pageNumber);
             currentPage = pageNumber;
+            localStorage.removeItem("searchQuery");
             localStorage.setItem("currentPage", currentPage);
             $(".page-link__item").removeClass("active");
             $(this).addClass("active");
-        }
-    });
-
-    // handle pagination button clicks
-    $("#startBtn").on("click", function () {
-        currentPage = 1;
-        $(".page-link__item").removeClass("active");
-        renderUsers(currentPage, searchQuery, sortOrder);
-    });
-
-    $(".prevBtn").on("click", function () {
-        if (currentPage > 1) {
-            currentPage--;
-            renderUsers(currentPage, searchQuery, sortOrder);
-            $(".page-link__item").removeClass("active");
         }
     });
 
